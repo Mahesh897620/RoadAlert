@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: RoadAlert-Backend
+    env: docker
+    region: oregon
+    plan: free
+    branch: main
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
