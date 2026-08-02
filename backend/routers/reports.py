@@ -13,7 +13,7 @@ from typing import Optional
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import JSONResponse
 
-from database import supabase
+from ai_database import supabase
 from models import ReportResponse
 from services.detector import detect_damage
 from services.scorer import calculate_priority
