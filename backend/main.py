@@ -1,10 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+import uvicorn
+
+# AI Backend Router
+from routers import reports as ai_reports
+
+# DB Mock Backend Routers
 from routes.report import router as report_router
 from routes.dashboard import router as dashboard_router
 from database.supabase_client import getReports
-from contextlib import asynccontextmanager
-import uvicorn
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -24,19 +29,31 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown logic if any
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title="RoadAlert API",
+    description="AI Road Intelligence Platform — Unified Backend API",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
-# Allow CORS for the frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Update for production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(report_router)
-app.include_router(dashboard_router)
+@app.get("/", tags=["Health"])
+def root():
+    return {"status": "Backend Running"}
+
+# Include AI-based reports router (from root)
+app.include_router(ai_reports.router, prefix="/api/reports", tags=["AI Reports"])
+
+# Include DB mock-based routers (from backend database)
+app.include_router(report_router, tags=["DB Mock Reports"])
+app.include_router(dashboard_router, tags=["Dashboard"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
